@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -38,7 +39,7 @@ func commandChecker(command string) {
 	switch command {
 	case "server":
 		fmt.Println("Server is running")
-		// runServer()
+		runServer()
 
 	case "pull":
 		if len(os.Args) < 3 {
@@ -61,4 +62,22 @@ func commandChecker(command string) {
 		printUsage()
 	}
 
+}
+
+func runServer() {
+
+	if info, err := os.Stat(fileName); os.IsNotExist(err) {
+		file, err := os.Create(fileName)
+		if err != nil {
+			log.Fatal("Error creating file:", err)
+		}
+		defer file.Close() //defer used i don't know for now but might be useful later just may be safe for future purpose'
+		fmt.Printf("Created %s\n", fileName)
+	} else {
+		fmt.Printf("File: %s\n", info.Name())
+		fmt.Printf("Size: %d bytes\n", info.Size())
+		fmt.Printf("Modified: %s\n", info.ModTime())
+		fmt.Printf("Permissions: %s\n", info.Mode())
+	}
+	return
 }
