@@ -1,11 +1,13 @@
 package main
 
+//package imports
 import (
 	"fmt"
 	"log"
 	"os"
 )
 
+// some constants defined
 const (
 	fileName = "new.txt"
 	port     = ":8000"
@@ -25,6 +27,7 @@ func main() {
 
 }
 
+// notify the users of the command and their usage
 func printUsage() {
 	fmt.Println("File Synchronization tool")
 	fmt.Println("Usage:")
@@ -34,6 +37,7 @@ func printUsage() {
 	fmt.Println("")
 }
 
+// checks the command of the users if they are valid for our program or not
 func commandChecker(command string) {
 
 	switch command {
@@ -64,6 +68,7 @@ func commandChecker(command string) {
 
 }
 
+// function to run the server
 func runServer() {
 
 	if info, err := os.Stat(fileName); os.IsNotExist(err) {
