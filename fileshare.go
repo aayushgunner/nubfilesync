@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 )
 
@@ -84,5 +85,14 @@ func runServer() {
 		fmt.Printf("Modified: %s\n", info.ModTime())
 		fmt.Printf("Permissions: %s\n", info.Mode())
 	}
-	return
+
+	fmt.Println("=== File Sync Server ===")
+	fmt.Printf("File: %s\n", fileName)
+	fmt.Printf("Port :%s\n", port)
+	fmt.Printf("Server starting on port %s ..\n", port)
+	// http.HandleFunc("/file", handleFile)
+	// http.HandleFunc("/status", handleStatus)
+	// http.HandleFunc("/", handleRoot)
+	log.Fatal(http.ListenAndServe(port, nil))
+
 }
