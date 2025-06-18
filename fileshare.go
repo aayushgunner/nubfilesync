@@ -131,4 +131,22 @@ func handleFile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 
 	}
+
+}
+
+func handleStatus(w http.ResponseWriter, r *http.Request) {
+	info, err := os.Stat(fileName)
+	if err != nil {
+		http.Error(w, "File not found", http.StatusNotFound)
+		return
+	}
+
+	fmt.Fprintf(w, "File: %s\nSize: %d bytes\nModified: %s\n",
+		fileName, info.Size(), info.ModTime().Format("2006-01-02 15:04:05"))
+
+}
+
+func handleRoot(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "File Sync Server Running\nUse /file endpoint for sync operations\nUse /status for file info\n")
+
 }
