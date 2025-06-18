@@ -2,6 +2,7 @@ package main
 
 //package imports
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -91,9 +92,9 @@ func runServer() {
 	fmt.Printf("File: %s\n", fileName)
 	fmt.Printf("Port :%s\n", port)
 	fmt.Printf("Server starting on port %s ..\n", port)
-	// http.HandleFunc("/file", handleFile)
-	// http.HandleFunc("/status", handleStatus)
-	// http.HandleFunc("/", handleRoot)
+	http.HandleFunc("/file", handleFile)
+	http.HandleFunc("/status", handleStatus)
+	http.HandleFunc("/", handleRoot)
 	log.Fatal(http.ListenAndServe(port, nil))
 
 }
@@ -176,5 +177,38 @@ func pullFile(ipv6Address string) {
 	fmt.Printf(" File pulled successfully\n")
 	fmt.Printf("  Size: %d bytes\n", len(content))
 	fmt.Printf("  Saved to: %s\n", fileName)
+
+}
+
+func pushFile(ipv6Address string) {
+	serverURL := fmt.Sprintf("http://[%s]%s", ipv6Address, port)
+	if _, err := os.Stat(fileName); os.IsNotExist(err) {
+		log.Fatalf("Local file %s doesn't exist", fileName)
+	}
+
+	fmt.Printf("Pushing file to %s", serverURL)
+	content, err := os.ReadFile(fileName)
+	if err != nil {
+		log.Fatal("Error reading local file:", err)
+	}
+
+	resp, err := http.Post(serverURL+"/file", "text/plain", bytes.NewBuffer(content))
+	if err != nil {
+		log.Fatal("Error connectng to server")
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		log.Fatalf("Server error: %s - %s", resp.Status, string(body))
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("Error reading response:", err)
+	}
+	fmt.Printf("✓ File pushed successfully\n")
+	fmt.Printf("  Size: %d bytes\n", len(content))
+	fmt.Printf("  Server response: %s\n", string(body))
 
 }
