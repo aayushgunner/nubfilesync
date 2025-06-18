@@ -150,3 +150,31 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "File Sync Server Running\nUse /file endpoint for sync operations\nUse /status for file info\n")
 
 }
+
+func pullFile(ipv6Address string) {
+	serverURL := fmt.Sprintf("http://[%s]%s", ipv6Address, port)
+
+	fmt.Printf("Pulling file from %s...\n", serverURL)
+	resp, err := http.Get(serverURL + "/file")
+	if err != nil {
+		log.Fatal("Error connecting to the server")
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		log.Fatalf("Server error: %s", resp.Status)
+	}
+	content, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("Error reading response:", err)
+	}
+
+	err = os.WriteFile(fileName, content, 0644)
+	if err != nil {
+		log.Fatal("Error writing local file", err)
+	}
+	fmt.Printf(" File pulled successfully\n")
+	fmt.Printf("  Size: %d bytes\n", len(content))
+	fmt.Printf("  Saved to: %s\n", fileName)
+
+}
