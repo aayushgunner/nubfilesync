@@ -3,6 +3,7 @@ package main
 //package imports
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -95,4 +96,39 @@ func runServer() {
 	// http.HandleFunc("/", handleRoot)
 	log.Fatal(http.ListenAndServe(port, nil))
 
+}
+
+func handleFile(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		content, err := os.ReadFile(fileName)
+		if err != nil {
+			http.Error(w, "Error reading file", http.StatusInternalServerError)
+			fmt.Printf("Error reading file: %v\n", err)
+			return
+		}
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write(content)
+		fmt.Printf("File sent to client (%d bytes)\n", len(content))
+
+	case "POST":
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Error reading request body", http.StatusBadRequest)
+			return
+		}
+
+		err = os.WriteFile(fileName, body, 0644)
+		if err != nil {
+			http.Error(w, "Error writing file", http.StatusInternalServerError)
+			fmt.Printf("Error writing file: %v\n", err)
+			return
+		}
+		fmt.Printf("File updated by client (%d bytes)\n", len(body))
+		fmt.Fprintf(w, "File uploaded successfully")
+
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+
+	}
 }
